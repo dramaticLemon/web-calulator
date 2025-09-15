@@ -1,94 +1,73 @@
-/* By Nellose [https://github.com/Nellose/] */
-
 document.addEventListener('DOMContentLoaded', function () {
     const display = document.getElementById('display');
     const buttons = document.getElementById('buttons');
-    let currentInput = '0';
+    let currentInput = '';
     let firstOperand = null;
     let operator = null;
-    let awaitingNextInput = false;
+
+    function updateDisplay(text) {
+        display.textContent = text || '0';
+    }
 
     buttons.addEventListener('click', function (event) {
-        if (event.target.matches('button')) {
-            handleButtonClick(event.target.value);
-            updateDisplay();
+        if (!event.target.matches('button')) return;
+
+        const value = event.target.value;
+
+        if (value === 'clear') {
+            currentInput = '';
+            firstOperand = null;
+            operator = null;
+            updateDisplay('0');
+        }
+        else if (['add', 'subtract', 'multiply', 'divide'].includes(value)) {
+            if (currentInput === '') return;
+            firstOperand = currentInput;
+            operator = value;
+            currentInput = '';
+        }
+        else if (value === 'calculate') {
+            if (firstOperand !== null && operator !== null && currentInput !== '') {
+                sendCalculation(firstOperand, currentInput, operator);
+                firstOperand = null;
+                operator = null;
+            }
+        }
+        else if (value === 'decimal') {
+            if (!currentInput.includes('.')) {
+                currentInput += (currentInput === '' ? '0.' : '.');
+                updateDisplay(currentInput);
+            }
+        }
+        else if (value === 'plus-minus') {
+            if (currentInput) {
+                currentInput = currentInput.startsWith('-') ? currentInput.slice(1) : '-' + currentInput;
+                updateDisplay(currentInput);
+            }
+        }
+        else if (['sqrt', 'percent'].includes(value)) {
+            if (currentInput === '') return;
+            sendCalculation(currentInput, 0, value);
+        }
+        else {
+            currentInput += value;
+            updateDisplay(currentInput);
         }
     });
 
-    function handleButtonClick(value) {
-        if (value === 'clear') {
-            clearAll();
-        } else if (isNumber(value)) {
-            inputDigit(value);
-        } else if (isOperator(value)) {
-            handleOperator(value);
-        } else if (value === 'decimal') {
-            inputDecimal();
-        } else if (value === 'calculate') {
-            performCalculation();
-        }
-    }
-
-    function isNumber(value) {
-        return !isNaN(value);
-    }
-
-    function inputDigit(digit) {
-        if (currentInput === '0' || awaitingNextInput) {
-            currentInput = digit;
-            awaitingNextInput = false;
-        } else {
-            currentInput += digit;
-        }
-    }
-
-    function inputDecimal() {
-        if (!currentInput.includes('.')) {
-            currentInput += '.';
-        }
-    }
-
-    function handleOperator(nextOperator) {
-        const inputValue = parseFloat(currentInput);
-        if (firstOperand === null) {
-            firstOperand = inputValue;
-        } else if (operator) {
-            const result = performCalculation();
-            currentInput = String(result);
-            firstOperand = result;
-        }
-        operator = nextOperator;
-        awaitingNextInput = true;
-    }
-
-    function performCalculation() {
-        const inputValue = parseFloat(currentInput);
-        if (operator === 'add') {
-            currentInput = String(firstOperand + inputValue);
-        } else if (operator === 'subtract') {
-            currentInput = String(firstOperand - inputValue);
-        } else if (operator === 'multiply') {
-            currentInput = String(firstOperand * inputValue);
-        } else if (operator === 'divide') {
-            currentInput = String(firstOperand / inputValue);
-        }
-        operator = null;
-        awaitingNextInput = true;
-        return parseFloat(currentInput);
-    }
-
-    function clearAll() {
-        currentInput = '0';
-        firstOperand = null;
-        operator = null;
-        awaitingNextInput = false;
-    }
-
-    function updateDisplay() {
-        display.textContent = currentInput;
-    }
-
-    function isOperator(value) {
-        return ['add', 'subtract', 'multiply', 'divide'].includes(value);
+    function sendCalculation(first, second, operator) {
+        fetch('/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `firstOperand=${first}&secondOperand=${second}&operator=${operator}`
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const result = doc.getElementById('display').textContent;
+            currentInput = result;
+            updateDisplay(result);
+        })
     }
 });

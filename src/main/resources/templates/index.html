@@ -6,30 +6,36 @@
 
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="icon" th:href="@{/other/ico.ico}" type="image/x-icon">
-    <title>Nellose | Calculator</title>
+    <title>Server | Calculator</title>
 </head>
 <body>
 <div class="calculator">
-    <div class="display" id="display">0</div>
+    <div class="display" id="display" th:text="${result != null ? result : 0}">0</div>
+
     <div class="buttons" id="buttons">
-        <button class="operator" value="clear">C</button>
+        <button class="operator" value="clear">CE</button>
+        <button class="operator" value="sqrt">√x</button>
+        <button class="operator" value="percent">%</button>
+        <button class="operator" value="divide">/</button>
+
         <button value="7">7</button>
         <button value="8">8</button>
         <button value="9">9</button>
-        <button class="operator" value="add">+</button>
+        <button class="operator" value="multiply">*</button>
 
         <button value="4">4</button>
         <button value="5">5</button>
         <button value="6">6</button>
-        <button class="operator" value="multiply">*</button>
+        <button class="operator" value="subtract">-</button>
 
         <button value="1">1</button>
         <button value="2">2</button>
         <button value="3">3</button>
-        <button class="operator" value="subtract">-</button>
+        <button class="operator" value="add">+</button>
 
         <button value="0">0</button>
         <button value="decimal">.</button>
+        <button value="plus-minus">+/-</button>
         <button class="operator" value="calculate">=</button>
     </div>
 </div>
