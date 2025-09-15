@@ -1,4 +1,4 @@
-package com.joit.tab.web_calculator.model;
+package com.joit.tab.model;
 
 public class Calculator {
 

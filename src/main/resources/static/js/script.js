@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     const display = document.getElementById('display');
     const buttons = document.getElementById('buttons');
     let currentInput = '';
@@ -9,9 +9,27 @@ document.addEventListener('DOMContentLoaded', function () {
         display.textContent = text || '0';
     }
 
-    buttons.addEventListener('click', function (event) {
-        if (!event.target.matches('button')) return;
+    async function sendRequest(endpoint, first, second = null) {
+        const body = { firstOperand: parseFloat(first), secondOperand: second ? parseFloat(second) : null };
 
+        const response = await fetch(`/api/${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            console.error("Error response:", response.statusText);
+            return;
+        }
+
+        const data = await response.json();
+        currentInput = data.result;
+        updateDisplay(currentInput);
+    }
+
+    buttons.addEventListener('click', (event) => {
+        if (!event.target.matches('button')) return;
         const value = event.target.value;
 
         if (value === 'clear') {
@@ -27,15 +45,15 @@ document.addEventListener('DOMContentLoaded', function () {
             currentInput = '';
         }
         else if (value === 'calculate') {
-            if (firstOperand !== null && operator !== null && currentInput !== '') {
-                sendCalculation(firstOperand, currentInput, operator);
+            if (firstOperand !== null && operator && currentInput !== '') {
+                sendRequest(operator, firstOperand, currentInput);
                 firstOperand = null;
                 operator = null;
             }
         }
         else if (value === 'decimal') {
             if (!currentInput.includes('.')) {
-                currentInput += (currentInput === '' ? '0.' : '.');
+                currentInput += currentInput === '' ? '0.' : '.';
                 updateDisplay(currentInput);
             }
         }
@@ -47,27 +65,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         else if (['sqrt', 'percent'].includes(value)) {
             if (currentInput === '') return;
-            sendCalculation(currentInput, 0, value);
+            sendRequest(value, currentInput);
         }
         else {
             currentInput += value;
             updateDisplay(currentInput);
         }
     });
-
-    function sendCalculation(first, second, operator) {
-        fetch('/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `firstOperand=${first}&secondOperand=${second}&operator=${operator}`
-        })
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const result = doc.getElementById('display').textContent;
-            currentInput = result;
-            updateDisplay(result);
-        })
-    }
 });

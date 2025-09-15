@@ -1,4 +1,4 @@
-package com.joit.tab.web_calculator;
+package com.joit.tab;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
