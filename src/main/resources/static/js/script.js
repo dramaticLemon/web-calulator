@@ -65,7 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         else if (['sqrt', 'percent'].includes(value)) {
             if (currentInput === '') return;
-            sendRequest(value, currentInput);
+
+            if (value === 'percent') {
+                if (firstOperand === null) {
+                    sendRequest(value, currentInput, null);
+                } else {
+                    sendRequest(value, firstOperand, currentInput);
+                }
+            } else {
+                sendRequest(value, currentInput, null);
+            }
         }
         else {
             currentInput += value;
