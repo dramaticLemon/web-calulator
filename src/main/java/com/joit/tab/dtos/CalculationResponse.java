@@ -12,7 +12,7 @@ public class CalculationResponse {
         }
     }
 
-    public String getResult() {
+    public String getResult () {
         return result;
     }
 }

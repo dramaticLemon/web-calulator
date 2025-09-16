@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 public class SqrtOperation implements OperationStrategy {
 
     @Observed
-    public double calculate(double a, Double b) {
-        if (a < 0) throw  new ArithmeticException("Negative number");
+    public double calculate (double a, Double b) {
+        if (a < 0) throw new ArithmeticException("Negative number");
         return Math.sqrt(a);
     }
 }

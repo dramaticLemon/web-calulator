@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class MultiplyOperation implements OperationStrategy {
 
     @Override
-    public double calculate(double a, Double b) {
+    public double calculate (double a, Double b) {
         return a * b;
     }
 }

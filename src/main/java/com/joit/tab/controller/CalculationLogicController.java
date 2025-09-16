@@ -11,12 +11,12 @@ public class CalculationLogicController {
 
     private final CalculationService service;
 
-    public CalculationLogicController(CalculationService service) {
+    public CalculationLogicController (CalculationService service) {
         this.service = service;
     }
 
     @PostMapping("/{operator}")
-    public CalculationResponse calculate(
+    public CalculationResponse calculate (
             @PathVariable String operator,
             @RequestBody CalculationRequest request
     ) {

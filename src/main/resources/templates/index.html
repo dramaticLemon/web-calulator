@@ -10,7 +10,9 @@
 </head>
 <body>
 <div class="calculator">
-    <div class="display" id="display" th:text="${result != null ? result : 0}">0</div>
+    <div class="display" id="display" th:text="${result != null ? result : 0}">
+        0
+    </div>
 
     <div class="buttons" id="buttons">
         <button class="operator" value="clear">CE</button>

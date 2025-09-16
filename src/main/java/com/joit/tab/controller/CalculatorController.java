@@ -9,10 +9,11 @@ public class CalculatorController {
 
     /**
      * Get calculator page
+     *
      * @return html page representation
      */
     @GetMapping("/app")
-    public String getHomePage(Model model) {
+    public String getHomePage (Model model) {
         model.addAttribute("result", "0");
         return "index"; // calculator page
     }

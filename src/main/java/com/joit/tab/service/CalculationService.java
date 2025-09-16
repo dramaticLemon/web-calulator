@@ -12,13 +12,14 @@ public class CalculationService {
     private final Map<String, OperationStrategy> strategies;
 
     @Autowired
-    public CalculationService(Map<String, OperationStrategy> strategies) {
+    public CalculationService (Map<String, OperationStrategy> strategies) {
         this.strategies = strategies;
     }
 
-    public double calculate(String operator, double a, Double b) {
+    public double calculate (String operator, double a, Double b) {
         OperationStrategy strategy = strategies.get(operator);
-        if (strategy == null) throw new IllegalArgumentException("Unknown operator: " + operator);
+        if (strategy == null)
+            throw new IllegalArgumentException("Unknown operator: " + operator);
         return strategy.calculate(a, b);
     }
 

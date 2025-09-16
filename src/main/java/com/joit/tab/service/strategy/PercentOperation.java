@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 public class PercentOperation implements OperationStrategy {
 
     @Override
-    public double calculate(double a, Double b) {
-        if (b == null) return  a / 100.0;
+    public double calculate (double a, Double b) {
+        if (b == null) return a / 100.0;
         return a * b / 100.0;
     }
 }
