@@ -8,7 +8,7 @@ public class DivideOperation implements OperationStrategy {
 
     @Override
     public double calculate(double a, Double b) {
-        if (b == 0) throw  new ArithmeticException("Division be zero");
+        if (b == 0) throw  new ArithmeticException("Division by zero");
         return a / b;
     }
 }
