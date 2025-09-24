@@ -6,79 +6,99 @@ document.addEventListener('DOMContentLoaded', () => {
     let operator = null;
 
     function updateDisplay(text) {
-        display.textContent = text || '0';
+        display.value = text || '0';
     }
 
     async function sendRequest(endpoint, first, second = null) {
-        const body = { firstOperand: parseFloat(first), secondOperand: second ? parseFloat(second) : null };
-
-        const response = await fetch(`/api/${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (!response.ok) {
-            console.error("Error response:", response.statusText);
-            return;
+        const body = { firstOperand: parseFloat(first), secondOperand: second !== null ? parseFloat(second) : null };
+        try {
+            const response = await fetch(`/app/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!response.ok) throw new Error(response.statusText);
+            const data = await response.json();
+            currentInput = data.result;
+            updateDisplay(currentInput);
+        } catch (err) {
+            console.error("Error:", err);
+            updateDisplay("Error");
         }
-
-        const data = await response.json();
-        currentInput = data.result;
-        updateDisplay(currentInput);
     }
+
+    async function sendExpression(expression) {
+        try {
+            const response = await fetch(`/app/evaluate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ expression })
+            });
+            if (!response.ok) throw new Error(response.statusText);
+            const data = await response.json();
+            currentInput = data.result;
+            updateDisplay(currentInput);
+        } catch (err) {
+            console.error("Error:", err);
+            updateDisplay("Error");
+        }
+    }
+
+    display.addEventListener('input', (e) => {
+        currentInput = e.target.value;
+    });
 
     buttons.addEventListener('click', (event) => {
         if (!event.target.matches('button')) return;
         const value = event.target.value;
 
-        if (value === 'clear') {
-            currentInput = '';
-            firstOperand = null;
-            operator = null;
-            updateDisplay('0');
-        }
-        else if (['add', 'subtract', 'multiply', 'divide'].includes(value)) {
-            if (currentInput === '') return;
-            firstOperand = currentInput;
-            operator = value;
-            currentInput = '';
-        }
-        else if (value === 'calculate') {
-            if (firstOperand !== null && operator && currentInput !== '') {
-                sendRequest(operator, firstOperand, currentInput);
+        switch (value) {
+            case 'clear':
+                currentInput = '';
                 firstOperand = null;
                 operator = null;
-            }
-        }
-        else if (value === 'decimal') {
-            if (!currentInput.includes('.')) {
-                currentInput += currentInput === '' ? '0.' : '.';
-                updateDisplay(currentInput);
-            }
-        }
-        else if (value === 'plus-minus') {
-            if (currentInput) {
-                currentInput = currentInput.startsWith('-') ? currentInput.slice(1) : '-' + currentInput;
-                updateDisplay(currentInput);
-            }
-        }
-        else if (['sqrt', 'percent'].includes(value)) {
-            if (currentInput === '') return;
+                updateDisplay('0');
+                break;
 
-            if (value === 'percent') {
-                if (firstOperand === null) {
-                    sendRequest(value, currentInput, null);
-                } else {
-                    sendRequest(value, firstOperand, currentInput);
+            case 'calculate':
+                if (firstOperand !== null && operator && currentInput !== '') {
+                    sendRequest(operator, firstOperand, currentInput);
+                    firstOperand = null;
+                    operator = null;
                 }
-            } else {
-                sendRequest(value, currentInput, null);
-            }
-        }
-        else {
-            currentInput += value;
-            updateDisplay(currentInput);
+                else if (currentInput.trim() !== '') {
+                    sendExpression(currentInput);
+                }
+                break;
+
+            case 'plus-minus':
+                if (currentInput) {
+                    currentInput = currentInput.startsWith('-') ? currentInput.slice(1) : '-' + currentInput;
+                    updateDisplay(currentInput);
+                }
+                break;
+
+            case 'decimal':
+                if (!currentInput.includes('.')) {
+                    currentInput += currentInput === '' ? '0.' : '.';
+                    updateDisplay(currentInput);
+                }
+                break;
+
+            case 'add':
+            case 'subtract':
+            case 'multiply':
+            case 'divide':
+                if (currentInput === '') return;
+                firstOperand = currentInput;
+                operator = value;
+                currentInput = '';
+                break;
+
+            default:
+                currentInput += value;
+                updateDisplay(currentInput);
+                break;
         }
     });
 });
